@@ -17,7 +17,18 @@ namespace ClassLibrary
                     // Add some information to the file.
                     fs.Write(info, 0, info.Length);
                 }
+            }
 
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        public static void ReadTxt(string path)
+        {
+            try
+            {
                 // Open the stream and read it back.
                 using (StreamReader sr = File.OpenText(path))
                 {

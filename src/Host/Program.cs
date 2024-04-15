@@ -1,8 +1,6 @@
 ﻿using OfficeOpenXml;
 using System.IO;
 using System;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.Math;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using ClassLibrary;
 
 namespace Host
@@ -20,9 +18,10 @@ namespace Host
                 int colCount = worksheet.Dimension.End.Column;  //get Column Count
                 int rowCount = worksheet.Dimension.End.Row;     //get row count
 
-                Console.WriteLine(" Row:" + 13 + " column:" + 3 + " Value:" + worksheet.Cells[13, 3].Value.ToString().Trim());
+                Console.WriteLine(" Row:" + 13 + " column:" + 3 + " Value:" + worksheet.Cells[13, 3].Value.ToString().Trim() + "\n");
 
                 Txt.CreateTxt(pathTxt);
+                Txt.ReadTxt(pathTxt);
             }
         }
     }
