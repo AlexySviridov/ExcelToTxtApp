@@ -19,15 +19,30 @@ namespace Host
 
                 for (int i = 6; i < colCount; i++)
                 {
-                    var armatureName = worksheet.Cells[15, 4].Value.ToString().Trim();
-                    var cellValue = worksheet.Cells[15, i].Value;
+                    var excelRow = 46;
+                    bool B2Exists = false;                    
+                    var armatureName = worksheet.Cells[excelRow, 4].Value.ToString().Trim();
+                    var cellValue = worksheet.Cells[excelRow, i].Value;
                     var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B1.db";
+                    var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B2.db");
 
                     if (cellValue != null)
                     {
                         if (!File.Exists(pathTxt))
                         {
                             Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue.ToString().Trim()));
+                        }
+
+                        //if (cellValue.ToString().Split('/')[1].Trim() == "Откр" ||
+                        //    cellValue.ToString().Split('/')[1].Trim() == "Закр")
+                        //{
+                        if (cellValue.ToString().Split('/').Length > 1)
+                        {
+                            B2Exists = true;
+                            if (!File.Exists(pathTxtB2))
+                            {
+                                Txt.CreateTxt(pathTxtB2, "Команда");
+                            }                       
                         }
 
                         var numberPosition = worksheet.Cells[5, i].Value.ToString().Trim();
@@ -50,6 +65,15 @@ namespace Host
                         Txt.WriteTxt(pathTxt, string2);
                         Txt.WriteTxt(pathTxt, string3);
                         Txt.WriteTxt(pathTxt, string4);
+
+                        if (B2Exists)
+                        {
+                            var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.ToString().Split('/')[1].Trim();
+                            Txt.WriteTxt(pathTxtB2, "--SIDESC--");
+                            Txt.WriteTxt(pathTxtB2, string2);
+                            Txt.WriteTxt(pathTxtB2, string3);
+                            Txt.WriteTxt(pathTxtB2, string4B2);
+                        }
                     }
                 }
             }
