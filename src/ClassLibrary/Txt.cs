@@ -6,16 +6,14 @@ namespace ClassLibrary
 {
     public class Txt
     {
-        public static void CreateTxt(string path)
+        public static void WriteTxt(string path, string blcap)
         {
             try
-            {
-                // Create the file, or overwrite if the file exists.
+            {                
                 using (FileStream fs = File.Create(path))
                 {
-                    byte[] info = new UTF8Encoding(true).GetBytes("This is some text in the file.");
-                    // Add some information to the file.
-                    fs.Write(info, 0, info.Length);
+                    byte[] info = new UTF8Encoding(true).GetBytes("--TABS--\nОткрыть\nЗакрыть\n--BLCAP--\n" + blcap);
+                    fs.Write(info, 0, info.Length);                 
                 }
             }
 
@@ -29,7 +27,6 @@ namespace ClassLibrary
         {
             try
             {
-                // Open the stream and read it back.
                 using (StreamReader sr = File.OpenText(path))
                 {
                     string s = "";
