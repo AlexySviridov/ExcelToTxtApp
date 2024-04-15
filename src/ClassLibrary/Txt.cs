@@ -6,14 +6,33 @@ namespace ClassLibrary
 {
     public class Txt
     {
-        public static void WriteTxt(string path, string blcap)
+        public static void WriteTxt(string path, string line)
         {
             try
-            {                
-                using (FileStream fs = File.Create(path))
+            {
+                using (StreamWriter sw = new StreamWriter(path, true, Encoding.GetEncoding(1251)))
                 {
-                    byte[] info = new UTF8Encoding(true).GetBytes("--TABS--\nОткрыть\nЗакрыть\n--BLCAP--\n" + blcap);
-                    fs.Write(info, 0, info.Length);                 
+                    sw.WriteLine(line);
+                }
+            }
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+        }
+
+        public static void CreateTxt(string path, string blcap)
+        {
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(path, true, Encoding.GetEncoding(1251)))
+                {
+                    sw.WriteLine("--TABS--");
+                    sw.WriteLine("Открыть");
+                    sw.WriteLine("Закрыть");
+                    sw.WriteLine("--BLCAP--");
+                    sw.WriteLine(blcap);
                 }
             }
 
