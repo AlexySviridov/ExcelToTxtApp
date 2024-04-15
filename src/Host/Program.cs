@@ -25,55 +25,51 @@ namespace Host
 
                     if (cellValue != null)
                     {
-                        if (cellValue.ToString().Split('/')[0].Trim() == "ЗапО" ||
-                            cellValue.ToString().Split('/')[0].Trim() == "ЗапЗ")
+                        if (!File.Exists(pathTxt))
                         {
-                            var blcap = "Запрет";
-                            //Console.WriteLine("true");
-                            if (!File.Exists(pathTxt))
-                            {
-                                Txt.CreateTxt(pathTxt, blcap);
-                            }
-
-                            var numberPosition = worksheet.Cells[5, i].Value.ToString().Trim();
-                            var nakladka = worksheet.Cells[7, i].Value.ToString().Trim();
-                            var outputReley = worksheet.Cells[8, i].Value.ToString().Trim();
-
-                            if (i == 6)
-                            {
-                                numberPosition = "";
-                                nakladka = "";
-                                outputReley = "";
-                            }
-
-                            var string2 = worksheet.Cells[2, i].Value.ToString().Trim() + "||" + worksheet.Cells[3, i].Value.ToString().Trim() +
-                                "||" + worksheet.Cells[4, i].Value.ToString().Trim();
-                            var string3 = numberPosition + "||" + worksheet.Cells[6, i].Value.ToString();
-                            var string4 = nakladka + "||" + outputReley + "||" + cellValue.ToString().Split('/')[0].Trim();
-
-                            Txt.WriteTxt(pathTxt, "--SIDESC--");
-                            Txt.WriteTxt(pathTxt, string2);
-                            Txt.WriteTxt(pathTxt, string3);
-                            Txt.WriteTxt(pathTxt, string4);
+                            Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue.ToString().Trim()));
                         }
 
-                        //if (cellValue.ToString().Split('/')[0].Trim() == "Закр" || cellValue.ToString().Split('/')[0].Trim() == "Откр"
-                        //    || cellValue.ToString().Split('/')[0].Trim() == "Вкл" || cellValue.ToString().Split('/')[0].Trim() == "Откл")
-                        //{
-                        //    var blcap = "Команда";
-                        //    if (!File.Exists(pathTxt))
-                        //    {
-                        //        Txt.CreateTxt(pathTxt, blcap);
-                        //    }
-                        //}
+                        var numberPosition = worksheet.Cells[5, i].Value.ToString().Trim();
+                        var nakladka = worksheet.Cells[7, i].Value.ToString().Trim();
+                        var outputReley = worksheet.Cells[8, i].Value.ToString().Trim();
+
+                        if (i == 6)
+                        {
+                            numberPosition = "";
+                            nakladka = "";
+                            outputReley = "";
+                        }
+
+                        var string2 = worksheet.Cells[2, i].Value.ToString().Trim() + "||" + worksheet.Cells[3, i].Value.ToString().Trim() +
+                            "||" + worksheet.Cells[4, i].Value.ToString().Trim();
+                        var string3 = numberPosition + "||" + worksheet.Cells[6, i].Value.ToString();
+                        var string4 = nakladka + "||" + outputReley + "||" + cellValue.ToString().Split('/')[0].Trim();
+
+                        Txt.WriteTxt(pathTxt, "--SIDESC--");
+                        Txt.WriteTxt(pathTxt, string2);
+                        Txt.WriteTxt(pathTxt, string3);
+                        Txt.WriteTxt(pathTxt, string4);
                     }
                 }
             }
         }
 
-        static private void TypeBLCAP()
+        static private string TypeBLCAP(string cellValue)
         {
-
+            if (cellValue.ToString().Split('/')[0].Trim() == "ЗапО" ||
+                            cellValue.ToString().Split('/')[0].Trim() == "ЗапЗ")
+            {
+                return "Запрет";
+            }
+            else if (cellValue.ToString().Split('/')[0].Trim() == "Закр" ||
+                            cellValue.ToString().Split('/')[0].Trim() == "Откр" ||
+                                cellValue.ToString().Split('/')[0].Trim() == "Вкл" ||
+                                    cellValue.ToString().Split('/')[0].Trim() == "Откл")
+            {
+                return "Команда";
+            }                
+            else throw new Exception("Неопознанная команда или запрет!!");
         }
     }
 }
