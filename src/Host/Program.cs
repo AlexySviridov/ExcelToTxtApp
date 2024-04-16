@@ -3,6 +3,8 @@ using System.IO;
 using System;
 using ClassLibrary;
 using System.Linq;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
+using System.Data.Common;
 
 namespace Host
 {
@@ -18,6 +20,7 @@ namespace Host
                 int rowCount = worksheet.Dimension.End.Row;
                 var ignoreRowArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90, 93, 94, 95 };
                 var commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл"};
+                var bansArray = new[] { "ЗапО", "ЗапЗ" };
 
                 for (int i = 13; i <= rowCount; i++)
                 {
@@ -35,7 +38,7 @@ namespace Host
                                                             
                                 if (!File.Exists(pathTxt))
                                 {
-                                    Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, i, j));
+                                    Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j));
                                 }
 
                                 if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
@@ -48,9 +51,7 @@ namespace Host
                                 }
                                 else if (cellValue.Split('/').Length > 1 && cellValue.Split('/')[1] != "Руч")
                                 {
-                                    Console.WriteLine(cellValue.Split('/').Length);
-                                    Console.WriteLine("Ошибка при работе с ячейкой по адресу:\nСтрока: " + i + " Столбец: " + j);
-                                    throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1]);
+                                    throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1] + " в ячейке по адресу - строка " + i + " столбец " + j);
                                 }
 
                                 var numberPosition = worksheet.Cells[5, j].Value.ToString().Trim();
@@ -89,26 +90,17 @@ namespace Host
             }
         }
 
-        static private string TypeBLCAP(string cellValue, int j, int i)
+        static private string TypeBLCAP(string cellValue, string[] commandsArray, string[] bansArray, int row, int column)
         {
-            if (cellValue.Split('/')[0] == "ЗапО" ||
-                            cellValue.Split('/')[0] == "ЗапЗ")
+            if (bansArray.Contains(cellValue.Split('/')[0]))
             {
                 return "Запрет";
             }
-            else if (cellValue.Split('/')[0] == "Закр" ||
-                            cellValue.Split('/')[0] == "Откр" ||
-                                cellValue.Split('/')[0] == "Вкл" ||
-                                    cellValue.Split('/')[0] == "Откл")
+            else if (commandsArray.Contains(cellValue.Split('/')[0]))
             {
                 return "Команда";
             }
-            else
-            {
-                Console.WriteLine("Строка " + j + "Столбец " + i);
-                Console.WriteLine(cellValue.Split('/')[0]);
-                throw new Exception("Неопознанная команда или запрет!!");                
-            }
+            else throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[0] + " в ячейке по адресу - строка " + row + " столбец " + column);            
         }
     }
 }
