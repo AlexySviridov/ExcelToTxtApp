@@ -16,7 +16,7 @@ namespace Host
                 ExcelWorksheet worksheet = package.Workbook.Worksheets[11];
                 int colCount = worksheet.Dimension.End.Column;
                 int rowCount = worksheet.Dimension.End.Row;
-                var ignoreRowArray = new[] { 15, 34, 35, 36, 37, 38, 39, 87, 88, 90, 93, 94, 95 };
+                var ignoreRowArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90, 93, 94, 95 };
                 var commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл"};
 
                 for (int i = 13; i <= rowCount; i++)
@@ -38,8 +38,6 @@ namespace Host
                                     Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, i, j));
                                 }
 
-                                //if (cellValue.ToString().Split('/').Length > 1)
-                                //{
                                 if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
                                 {
                                     B2Exists = true;
