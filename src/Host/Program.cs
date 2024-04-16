@@ -17,28 +17,30 @@ namespace Host
                 int colCount = worksheet.Dimension.End.Column;
                 int rowCount = worksheet.Dimension.End.Row;
                 var ignoreRowArray = new[] { 15, 34, 35, 36, 37, 38, 39, 87, 88, 90, 93, 94, 95 };
+                var commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл"};
 
-                for (int j = 13; j < rowCount; j++)
+                for (int i = 13; i <= rowCount; i++)
                 {
-                    if (!ignoreRowArray.Contains(j))
+                    if (!ignoreRowArray.Contains(i))
                     {
-                        for (int i = 6; i < colCount; i++)
+                        for (int j = 6; j <= colCount; j++)
                         {
-                            var excelRow = j;
-                            bool B2Exists = false;
-                            var armatureName = worksheet.Cells[excelRow, 4].Value.ToString().Trim();
-                            var cellValue = worksheet.Cells[excelRow, i].Value;
-                            var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B1.db";
-                            var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B2.db");
-
-                            if (cellValue != null)
+                            if (worksheet.Cells[i, j].Value != null)
                             {
+                                bool B2Exists = false;
+                                var cellValue = worksheet.Cells[i, j].Value.ToString().Trim();
+                                var armatureName = worksheet.Cells[i, 4].Value.ToString().Trim();                                                  
+                                var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B1.db";
+                                var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B2.db");
+                                                            
                                 if (!File.Exists(pathTxt))
                                 {
-                                    Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue.ToString().Trim(), j, i));
+                                    Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, i, j));
                                 }
 
-                                if (cellValue.ToString().Split('/').Length > 1)
+                                //if (cellValue.ToString().Split('/').Length > 1)
+                                //{
+                                if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
                                 {
                                     B2Exists = true;
                                     if (!File.Exists(pathTxtB2))
@@ -46,22 +48,28 @@ namespace Host
                                         Txt.CreateTxt(pathTxtB2, "Команда");
                                     }
                                 }
+                                else if (cellValue.Split('/').Length > 1 && cellValue.Split('/')[1] != "Руч")
+                                {
+                                    Console.WriteLine(cellValue.Split('/').Length);
+                                    Console.WriteLine("Ошибка при работе с ячейкой по адресу:\nСтрока: " + i + " Столбец: " + j);
+                                    throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1]);
+                                }
 
-                                var numberPosition = worksheet.Cells[5, i].Value.ToString().Trim();
-                                var nakladka = worksheet.Cells[7, i].Value.ToString().Trim();
-                                var outputReley = worksheet.Cells[8, i].Value.ToString().Trim();
+                                var numberPosition = worksheet.Cells[5, j].Value.ToString().Trim();
+                                var nakladka = worksheet.Cells[7, j].Value.ToString().Trim();
+                                var outputReley = worksheet.Cells[8, j].Value.ToString().Trim();
 
-                                if (i == 6)
+                                if (j == 6)
                                 {
                                     numberPosition = "";
                                     nakladka = "";
                                     outputReley = "";
                                 }
 
-                                var string2 = worksheet.Cells[2, i].Value.ToString().Trim() + "||" + worksheet.Cells[3, i].Value.ToString().Trim() +
-                                    "||" + worksheet.Cells[4, i].Value.ToString().Trim();
-                                var string3 = numberPosition + "||" + worksheet.Cells[6, i].Value.ToString();
-                                var string4 = nakladka + "||" + outputReley + "||" + cellValue.ToString().Split('/')[0].Trim();
+                                var string2 = worksheet.Cells[2, j].Value.ToString().Trim() + "||" + worksheet.Cells[3, j].Value.ToString().Trim() +
+                                    "||" + worksheet.Cells[4, j].Value.ToString().Trim();
+                                var string3 = numberPosition + "||" + worksheet.Cells[6, j].Value.ToString();
+                                var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
 
                                 Txt.WriteTxt(pathTxt, "--SIDESC--");
                                 Txt.WriteTxt(pathTxt, string2);
@@ -70,7 +78,7 @@ namespace Host
 
                                 if (B2Exists)
                                 {
-                                    var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.ToString().Split('/')[1].Trim();
+                                    var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
                                     Txt.WriteTxt(pathTxtB2, "--SIDESC--");
                                     Txt.WriteTxt(pathTxtB2, string2);
                                     Txt.WriteTxt(pathTxtB2, string3);
@@ -85,22 +93,22 @@ namespace Host
 
         static private string TypeBLCAP(string cellValue, int j, int i)
         {
-            if (cellValue.ToString().Split('/')[0].Trim() == "ЗапО" ||
-                            cellValue.ToString().Split('/')[0].Trim() == "ЗапЗ")
+            if (cellValue.Split('/')[0] == "ЗапО" ||
+                            cellValue.Split('/')[0] == "ЗапЗ")
             {
                 return "Запрет";
             }
-            else if (cellValue.ToString().Split('/')[0].Trim() == "Закр" ||
-                            cellValue.ToString().Split('/')[0].Trim() == "Откр" ||
-                                cellValue.ToString().Split('/')[0].Trim() == "Вкл" ||
-                                    cellValue.ToString().Split('/')[0].Trim() == "Откл")
+            else if (cellValue.Split('/')[0] == "Закр" ||
+                            cellValue.Split('/')[0] == "Откр" ||
+                                cellValue.Split('/')[0] == "Вкл" ||
+                                    cellValue.Split('/')[0] == "Откл")
             {
                 return "Команда";
             }
             else
             {
                 Console.WriteLine("Строка " + j + "Столбец " + i);
-                Console.WriteLine(cellValue.ToString().Split('/')[0].Trim());
+                Console.WriteLine(cellValue.Split('/')[0]);
                 throw new Exception("Неопознанная команда или запрет!!");                
             }
         }
