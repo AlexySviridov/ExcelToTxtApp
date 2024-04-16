@@ -16,12 +16,14 @@ namespace Host
                 ExcelWorksheet worksheet = package.Workbook.Worksheets[11];
                 int colCount = worksheet.Dimension.End.Column;
                 int rowCount = worksheet.Dimension.End.Row;
-                var ignoreRowArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90, 93, 94, 95 };
+
+                var ignoredRowsArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90, 93, 94, 95 };
                 var commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл"};
+                var bansArray = new[] { "ЗапО", "ЗапЗ" };
 
                 for (int i = 13; i <= rowCount; i++)
                 {
-                    if (!ignoreRowArray.Contains(i))
+                    if (!ignoredRowsArray.Contains(i))
                     {
                         for (int j = 6; j <= colCount; j++)
                         {
@@ -32,26 +34,8 @@ namespace Host
                                 var armatureName = worksheet.Cells[i, 4].Value.ToString().Trim();                                                  
                                 var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B1.db";
                                 var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B2.db");
-                                                            
-                                if (!File.Exists(pathTxt))
-                                {
-                                    Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, i, j));
-                                }
 
-                                if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
-                                {
-                                    B2Exists = true;
-                                    if (!File.Exists(pathTxtB2))
-                                    {
-                                        Txt.CreateTxt(pathTxtB2, "Команда");
-                                    }
-                                }
-                                else if (cellValue.Split('/').Length > 1 && cellValue.Split('/')[1] != "Руч")
-                                {
-                                    Console.WriteLine(cellValue.Split('/').Length);
-                                    Console.WriteLine("Ошибка при работе с ячейкой по адресу:\nСтрока: " + i + " Столбец: " + j);
-                                    throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1]);
-                                }
+                                CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists);
 
                                 var numberPosition = worksheet.Cells[5, j].Value.ToString().Trim();
                                 var nakladka = worksheet.Cells[7, j].Value.ToString().Trim();
@@ -69,18 +53,12 @@ namespace Host
                                 var string3 = numberPosition + "||" + worksheet.Cells[6, j].Value.ToString();
                                 var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
 
-                                Txt.WriteTxt(pathTxt, "--SIDESC--");
-                                Txt.WriteTxt(pathTxt, string2);
-                                Txt.WriteTxt(pathTxt, string3);
-                                Txt.WriteTxt(pathTxt, string4);
+                                Txt.WriteTxt(pathTxt, string2, string3, string4);
 
                                 if (B2Exists)
                                 {
                                     var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
-                                    Txt.WriteTxt(pathTxtB2, "--SIDESC--");
-                                    Txt.WriteTxt(pathTxtB2, string2);
-                                    Txt.WriteTxt(pathTxtB2, string3);
-                                    Txt.WriteTxt(pathTxtB2, string4B2);
+                                    Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
                                 }
                             }
                         }
@@ -89,26 +67,38 @@ namespace Host
             }
         }
 
-        static private string TypeBLCAP(string cellValue, int j, int i)
+        static private void CreateB1B2TxtFiles(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j, ref bool B2Exists)
         {
-            if (cellValue.Split('/')[0] == "ЗапО" ||
-                            cellValue.Split('/')[0] == "ЗапЗ")
+            if (!File.Exists(pathTxt))
+            {
+                Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j));
+            }
+
+            if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
+            {
+                B2Exists = true;
+                if (!File.Exists(pathTxtB2))
+                {
+                    Txt.CreateTxt(pathTxtB2, "Команда");
+                }
+            }
+            else if (cellValue.Split('/').Length > 1 && cellValue.Split('/')[1] != "Руч")
+            {
+                throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1] + " в ячейке по адресу - строка " + i + " столбец " + j);
+            }
+        }
+
+        static private string TypeBLCAP(string cellValue, string[] commandsArray, string[] bansArray, int row, int column)
+        {
+            if (bansArray.Contains(cellValue.Split('/')[0]))
             {
                 return "Запрет";
             }
-            else if (cellValue.Split('/')[0] == "Закр" ||
-                            cellValue.Split('/')[0] == "Откр" ||
-                                cellValue.Split('/')[0] == "Вкл" ||
-                                    cellValue.Split('/')[0] == "Откл")
+            else if (commandsArray.Contains(cellValue.Split('/')[0]))
             {
                 return "Команда";
             }
-            else
-            {
-                Console.WriteLine("Строка " + j + "Столбец " + i);
-                Console.WriteLine(cellValue.Split('/')[0]);
-                throw new Exception("Неопознанная команда или запрет!!");                
-            }
+            else throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[0] + " в ячейке по адресу - строка " + row + " столбец " + column);            
         }
     }
 }
