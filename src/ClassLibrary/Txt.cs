@@ -44,25 +44,5 @@ namespace ClassLibrary
                 Console.WriteLine(ex.ToString());
             }
         }
-
-        public static void ReadTxt(string path)
-        {
-            try
-            {
-                using (StreamReader sr = File.OpenText(path))
-                {
-                    string s = "";
-                    while ((s = sr.ReadLine()) != null)
-                    {
-                        Console.WriteLine(s);
-                    }
-                }
-            }
-
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.ToString());
-            }
-        }
     }
 }
