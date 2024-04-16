@@ -3,8 +3,6 @@ using System.IO;
 using System;
 using ClassLibrary;
 using System.Linq;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
-using System.Data.Common;
 
 namespace Host
 {
@@ -70,18 +68,12 @@ namespace Host
                                 var string3 = numberPosition + "||" + worksheet.Cells[6, j].Value.ToString();
                                 var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
 
-                                Txt.WriteTxt(pathTxt, "--SIDESC--");
-                                Txt.WriteTxt(pathTxt, string2);
-                                Txt.WriteTxt(pathTxt, string3);
-                                Txt.WriteTxt(pathTxt, string4);
+                                Txt.WriteTxt(pathTxt, string2, string3, string4);
 
                                 if (B2Exists)
                                 {
                                     var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
-                                    Txt.WriteTxt(pathTxtB2, "--SIDESC--");
-                                    Txt.WriteTxt(pathTxtB2, string2);
-                                    Txt.WriteTxt(pathTxtB2, string3);
-                                    Txt.WriteTxt(pathTxtB2, string4B2);
+                                    Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
                                 }
                             }
                         }

@@ -6,13 +6,16 @@ namespace ClassLibrary
 {
     public class Txt
     {
-        public static void WriteTxt(string path, string line)
+        public static void WriteTxt(string path, string string2, string string3, string string4)
         {
             try
             {
                 using (StreamWriter sw = new StreamWriter(path, true, Encoding.GetEncoding(1251)))
                 {
-                    sw.WriteLine(line);
+                    sw.WriteLine("--SIDESC--");
+                    sw.WriteLine(string2);
+                    sw.WriteLine(string3);
+                    sw.WriteLine(string4);
                 }
             }
 
