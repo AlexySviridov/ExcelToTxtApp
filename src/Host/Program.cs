@@ -3,6 +3,7 @@ using System.IO;
 using System;
 using ClassLibrary;
 using System.Linq;
+using System.Text;
 
 namespace Host
 {
@@ -10,7 +11,7 @@ namespace Host
     {
         static void Main(string[] args)
         {     
-            FileInfo existingFile = new FileInfo("C:\\Users\\User\\Desktop\\Илья\\K6. Info v1.20.xlsx");
+            FileInfo existingFile = new FileInfo("C:\\Users\\User\\Desktop\\Илья\\K6. Info v1.35.xlsx");
             using (ExcelPackage package = new ExcelPackage(existingFile))
             {
                 ExcelWorksheet worksheet = package.Workbook.Worksheets[11];
@@ -29,13 +30,15 @@ namespace Host
                         {
                             if (worksheet.Cells[i, j].Value != null)
                             {
+                                bool blcapBan = false;
                                 bool B2Exists = false;
                                 var cellValue = worksheet.Cells[i, j].Value.ToString().Trim();
                                 var armatureName = worksheet.Cells[i, 4].Value.ToString().Trim();                                                  
-                                var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B1.db";
-                                var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ\\" + armatureName + "_B2.db");
+                                var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B1.db";
+                                var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B2.db");
 
-                                CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists);
+                                CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists, ref blcapBan);
+                                FindImposter(cellValue, commandsArray, blcapBan, j);
 
                                 var numberPosition = worksheet.Cells[5, j].Value.ToString().Trim();
                                 var nakladka = worksheet.Cells[7, j].Value.ToString().Trim();
@@ -67,31 +70,48 @@ namespace Host
             }
         }
 
-        static private void CreateB1B2TxtFiles(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j, ref bool B2Exists)
+        static private void FindImposter(string cellValue, string[] commandsArray, bool blcapBan, int j)
         {
-            if (!File.Exists(pathTxt))
+            if (blcapBan && commandsArray.Contains(cellValue.Split('/')[1]))
             {
-                Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j));
+                using (StreamWriter sw = new StreamWriter("C:\\Users\\User\\Desktop\\imposter.db", true, Encoding.GetEncoding(1251)))
+                {
+                    sw.WriteLine(j);
+                }
             }
+        }
 
+
+        static private void CreateB1B2TxtFiles(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j, ref bool B2Exists, ref bool blcapBan)
+        {
             if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
             {
                 B2Exists = true;
-                if (!File.Exists(pathTxtB2))
-                {
-                    Txt.CreateTxt(pathTxtB2, "Команда");
-                }
             }
             else if (cellValue.Split('/').Length > 1 && cellValue.Split('/')[1] != "Руч")
             {
                 throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1] + " в ячейке по адресу - строка " + i + " столбец " + j);
             }
+
+            if (!File.Exists(pathTxt))
+            {
+                Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j, ref blcapBan), B2Exists);
+            }
+            
+            if (B2Exists)
+            {
+                if (!File.Exists(pathTxtB2))
+                {
+                    Txt.CreateTxt(pathTxtB2, "Команда", B2Exists);
+                }
+            }
         }
 
-        static private string TypeBLCAP(string cellValue, string[] commandsArray, string[] bansArray, int row, int column)
+        static private string TypeBLCAP(string cellValue, string[] commandsArray, string[] bansArray, int row, int column, ref bool blcapBan)
         {
             if (bansArray.Contains(cellValue.Split('/')[0]))
             {
+                blcapBan = true;
                 return "Запрет";
             }
             else if (commandsArray.Contains(cellValue.Split('/')[0]))
