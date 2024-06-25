@@ -14,37 +14,46 @@ namespace Host
             FileInfo existingFile = new FileInfo("C:\\Users\\User\\Desktop\\Илья\\K6. Info v1.35.xlsx");
             using (ExcelPackage package = new ExcelPackage(existingFile))
             {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[11];
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[12];
                 int colCount = worksheet.Dimension.End.Column;
                 int rowCount = worksheet.Dimension.End.Row;
 
-                var ignoredRowsArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90, 93, 94, 95 };
+                var ignoredRowsArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90 };
                 var commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл"};
                 var bansArray = new[] { "ЗапО", "ЗапЗ" };
 
                 for (int i = 13; i <= rowCount; i++)
                 {
+                    bool BansExists = false;
                     if (!ignoredRowsArray.Contains(i))
                     {
-                        for (int j = 6; j <= colCount; j++)
+                        for (int j = 5; j <= colCount; j++)
                         {
                             if (worksheet.Cells[i, j].Value != null)
                             {
-                                bool blcapBan = false;
+
                                 bool B2Exists = false;
                                 var cellValue = worksheet.Cells[i, j].Value.ToString().Trim();
-                                var armatureName = worksheet.Cells[i, 4].Value.ToString().Trim();                                                  
+                                var armatureName = worksheet.Cells[i, 3].Value.ToString().Trim();                                                  
                                 var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B1.db";
                                 var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B2.db");
 
-                                CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists, ref blcapBan);
-                                FindImposter(cellValue, commandsArray, blcapBan, j);
+                                CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists);
+
+                                if (bansArray.Contains(cellValue.Split('/')[0]))
+                                {
+                                    BansExists = true;
+                                }
+                                if (commandsArray.Contains(cellValue.Split('/')[0]) && BansExists)
+                                {
+                                    Console.WriteLine(i + " " + j);
+                                }
 
                                 var numberPosition = worksheet.Cells[5, j].Value.ToString().Trim();
                                 var nakladka = worksheet.Cells[7, j].Value.ToString().Trim();
                                 var outputReley = worksheet.Cells[8, j].Value.ToString().Trim();
 
-                                if (j == 6)
+                                if (j == 5)
                                 {
                                     numberPosition = "";
                                     nakladka = "";
@@ -70,19 +79,7 @@ namespace Host
             }
         }
 
-        static private void FindImposter(string cellValue, string[] commandsArray, bool blcapBan, int j)
-        {
-            if (blcapBan && commandsArray.Contains(cellValue.Split('/')[1]))
-            {
-                using (StreamWriter sw = new StreamWriter("C:\\Users\\User\\Desktop\\imposter.db", true, Encoding.GetEncoding(1251)))
-                {
-                    sw.WriteLine(j);
-                }
-            }
-        }
-
-
-        static private void CreateB1B2TxtFiles(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j, ref bool B2Exists, ref bool blcapBan)
+        static private void CreateB1B2TxtFiles(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j, ref bool B2Exists)
         {
             if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
             {
@@ -95,7 +92,7 @@ namespace Host
 
             if (!File.Exists(pathTxt))
             {
-                Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j, ref blcapBan), B2Exists);
+                Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j), B2Exists);
             }
             
             if (B2Exists)
@@ -107,11 +104,11 @@ namespace Host
             }
         }
 
-        static private string TypeBLCAP(string cellValue, string[] commandsArray, string[] bansArray, int row, int column, ref bool blcapBan)
+        static private string TypeBLCAP(string cellValue, string[] commandsArray, string[] bansArray, int row, int column)
         {
             if (bansArray.Contains(cellValue.Split('/')[0]))
             {
-                blcapBan = true;
+                Console.WriteLine(row + " - " + column);
                 return "Запрет";
             }
             else if (commandsArray.Contains(cellValue.Split('/')[0]))
