@@ -25,17 +25,29 @@ namespace ClassLibrary
             }
         }
 
-        public static void CreateTxt(string path, string blcap)
+        public static void CreateTxt(string path, string blcap, bool B2Exists)
         {
             try
             {
-                using (StreamWriter sw = new StreamWriter(path, true, Encoding.GetEncoding(1251)))
+                if (B2Exists)
                 {
-                    sw.WriteLine("--TABS--");
-                    sw.WriteLine("Открыть");
-                    sw.WriteLine("Закрыть");
-                    sw.WriteLine("--BLCAP--");
-                    sw.WriteLine(blcap);
+                    using (StreamWriter sw = new StreamWriter(path, true, Encoding.GetEncoding(1251)))
+                    {
+                        sw.WriteLine("--TABS--");
+                        sw.WriteLine("Открыть");
+                        sw.WriteLine("Закрыть");
+                        sw.WriteLine("--BLCAP--");
+                        sw.WriteLine(blcap);
+                    }
+                }
+                else
+                {
+                    using (StreamWriter sw = new StreamWriter(path, true, Encoding.GetEncoding(1251)))
+                    {
+                        sw.WriteLine("--TABS--");
+                        sw.WriteLine("--BLCAP--");
+                        sw.WriteLine(blcap);
+                    }
                 }
             }
 
