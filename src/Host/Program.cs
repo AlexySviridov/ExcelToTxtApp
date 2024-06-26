@@ -3,7 +3,6 @@ using System.IO;
 using System;
 using ClassLibrary;
 using System.Linq;
-using System.Text;
 
 namespace Host
 {
@@ -19,35 +18,41 @@ namespace Host
                 int rowCount = worksheet.Dimension.End.Row;
 
                 var ignoredRowsArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90 };
+                var unnormalRowsArray = new[] { 63, 64, 65, 67, 68, 69, 71, 72, 73, 75, 76, 77, 79, 80, 81, 83, 84, 85};
                 var commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл"};
                 var bansArray = new[] { "ЗапО", "ЗапЗ" };
 
                 for (int i = 13; i <= rowCount; i++)
                 {
-                    bool BansExists = false;
+                    //bool BansExists = false;
                     if (!ignoredRowsArray.Contains(i))
                     {
                         for (int j = 5; j <= colCount; j++)
                         {
                             if (worksheet.Cells[i, j].Value != null)
                             {
-
                                 bool B2Exists = false;
                                 var cellValue = worksheet.Cells[i, j].Value.ToString().Trim();
                                 var armatureName = worksheet.Cells[i, 3].Value.ToString().Trim();                                                  
                                 var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B1.db";
                                 var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B2.db");
 
-                                CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists);
+                                if (!unnormalRowsArray.Contains(i))
+                                {
+                                    CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists);
+                                }
+                                else CreateB1B2TxtFiles2(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j);
 
-                                if (bansArray.Contains(cellValue.Split('/')[0]))
-                                {
-                                    BansExists = true;
-                                }
-                                if (commandsArray.Contains(cellValue.Split('/')[0]) && BansExists)
-                                {
-                                    Console.WriteLine(i + " " + j);
-                                }
+
+                                //poisk unnormal strok
+                                //if (bansArray.Contains(cellValue.Split('/')[0]))
+                                //{
+                                //    BansExists = true;
+                                //}
+                                //if (commandsArray.Contains(cellValue.Split('/')[0]) && BansExists)
+                                //{
+                                //    Console.WriteLine(i + " " + j);
+                                //}
 
                                 var numberPosition = worksheet.Cells[5, j].Value.ToString().Trim();
                                 var nakladka = worksheet.Cells[7, j].Value.ToString().Trim();
@@ -63,19 +68,48 @@ namespace Host
                                 var string2 = worksheet.Cells[2, j].Value.ToString().Trim() + "||" + worksheet.Cells[3, j].Value.ToString().Trim() +
                                     "||" + worksheet.Cells[4, j].Value.ToString().Trim();
                                 var string3 = numberPosition + "||" + worksheet.Cells[6, j].Value.ToString();
-                                var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
 
-                                Txt.WriteTxt(pathTxt, string2, string3, string4);
-
-                                if (B2Exists)
+                                if (!unnormalRowsArray.Contains(i))
                                 {
-                                    var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
-                                    Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
+                                    var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
+                                    Txt.WriteTxt(pathTxt, string2, string3, string4);
+                                    if (B2Exists)
+                                    {
+                                        var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
+                                        Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
+                                    }
+                                }
+                                else
+                                {
+                                    if (bansArray.Contains(cellValue.Split('/')[0]))
+                                    {
+                                        var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
+                                        Txt.WriteTxt(pathTxt, string2, string3, string4);
+                                    }
+                                    else if (commandsArray.Contains(cellValue.Split('/')[0]))
+                                    {
+                                        var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
+                                        Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
+                                    }
+                                    else throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[0] + " в ячейке по адресу - строка " + i + " столбец " + j);
                                 }
                             }
                         }
                     }
                 }                
+            }
+        }
+
+        static private void CreateB1B2TxtFiles2(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j)
+        {
+            var B2Exists = true;
+            if (!File.Exists(pathTxt))
+            {
+                Txt.CreateTxt(pathTxt, "Запрет", B2Exists);
+            }
+            if (!File.Exists(pathTxtB2))
+            {
+                Txt.CreateTxt(pathTxtB2, "Команда", B2Exists);
             }
         }
 
@@ -108,7 +142,6 @@ namespace Host
         {
             if (bansArray.Contains(cellValue.Split('/')[0]))
             {
-                Console.WriteLine(row + " - " + column);
                 return "Запрет";
             }
             else if (commandsArray.Contains(cellValue.Split('/')[0]))
