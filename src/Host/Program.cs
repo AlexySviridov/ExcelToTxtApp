@@ -24,7 +24,6 @@ namespace Host
 
                 for (int i = 13; i <= rowCount; i++)
                 {
-                    //bool BansExists = false;
                     if (!ignoredRowsArray.Contains(i))
                     {
                         for (int j = 5; j <= colCount; j++)
@@ -41,18 +40,7 @@ namespace Host
                                 {
                                     CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists);
                                 }
-                                else CreateB1B2TxtFiles2(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j);
-
-
-                                //poisk unnormal strok
-                                //if (bansArray.Contains(cellValue.Split('/')[0]))
-                                //{
-                                //    BansExists = true;
-                                //}
-                                //if (commandsArray.Contains(cellValue.Split('/')[0]) && BansExists)
-                                //{
-                                //    Console.WriteLine(i + " " + j);
-                                //}
+                                else CreateB1B2TxtFiles2(pathTxt, pathTxtB2);
 
                                 var numberPosition = worksheet.Cells[5, j].Value.ToString().Trim();
                                 var nakladka = worksheet.Cells[7, j].Value.ToString().Trim();
@@ -100,7 +88,7 @@ namespace Host
             }
         }
 
-        static private void CreateB1B2TxtFiles2(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j)
+        static private void CreateB1B2TxtFiles2(string pathTxt, string pathTxtB2)
         {
             var B2Exists = true;
             if (!File.Exists(pathTxt))
