@@ -30,15 +30,15 @@ namespace Host
                         {
                             if (worksheet.Cells[i, j].Value != null)
                             {
-                                bool B2Exists = false;
                                 var cellValue = worksheet.Cells[i, j].Value.ToString().Trim();
                                 var armatureName = worksheet.Cells[i, 3].Value.ToString().Trim();                                                  
                                 var pathTxt = "C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B1.db";
                                 var pathTxtB2 = ("C:\\Users\\User\\Desktop\\ТЗиБ_v2\\" + armatureName + "_B2.db");
+                                bool b2Exists = B2Exists(cellValue, commandsArray, i, j);
 
                                 if (!unnormalRowsArray.Contains(i))
                                 {
-                                    CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, ref B2Exists);
+                                    CreateB1B2TxtFiles(pathTxt, pathTxtB2, cellValue, commandsArray, bansArray, i, j, b2Exists);
                                 }
                                 else CreateB1B2TxtFiles2(pathTxt, pathTxtB2);
 
@@ -61,7 +61,7 @@ namespace Host
                                 {
                                     var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
                                     Txt.WriteTxt(pathTxt, string2, string3, string4);
-                                    if (B2Exists)
+                                    if (b2Exists)
                                     {
                                         var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
                                         Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
@@ -69,15 +69,14 @@ namespace Host
                                 }
                                 else
                                 {
+                                    var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
                                     if (bansArray.Contains(cellValue.Split('/')[0]))
-                                    {
-                                        var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
+                                    {                                        
                                         Txt.WriteTxt(pathTxt, string2, string3, string4);
                                     }
                                     else if (commandsArray.Contains(cellValue.Split('/')[0]))
                                     {
-                                        var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
-                                        Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
+                                        Txt.WriteTxt(pathTxtB2, string2, string3, string4);
                                     }
                                     else throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[0] + " в ячейке по адресу - строка " + i + " столбец " + j);
                                 }
@@ -101,17 +100,8 @@ namespace Host
             }
         }
 
-        static private void CreateB1B2TxtFiles(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j, ref bool B2Exists)
+        static private void CreateB1B2TxtFiles(string pathTxt, string pathTxtB2, string cellValue, string[] commandsArray, string[] bansArray, int i, int j, bool B2Exists)
         {
-            if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
-            {
-                B2Exists = true;
-            }
-            else if (cellValue.Split('/').Length > 1 && cellValue.Split('/')[1] != "Руч")
-            {
-                throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1] + " в ячейке по адресу - строка " + i + " столбец " + j);
-            }
-
             if (!File.Exists(pathTxt))
             {
                 Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j), B2Exists);
@@ -124,6 +114,19 @@ namespace Host
                     Txt.CreateTxt(pathTxtB2, "Команда", B2Exists);
                 }
             }
+        }
+
+        static private bool B2Exists(string cellValue, string[] commandsArray, int i, int j)
+        {
+            if (cellValue.Split('/').Length > 1 && commandsArray.Contains(cellValue.Split('/')[1]))
+            {
+                return true;
+            }
+            else if (cellValue.Split('/').Length > 1 && cellValue.Split('/')[1] != "Руч")
+            {
+                throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[1] + " в ячейке по адресу - строка " + i + " столбец " + j);
+            }
+            else return false;
         }
 
         static private string TypeBLCAP(string cellValue, string[] commandsArray, string[] bansArray, int row, int column)
