@@ -24,14 +24,16 @@ namespace ClassLibrary
 
                 for (int i = firstArmatureRow; i <= rowCount; i++)
                 {
-                    Armature armature = new Armature(worksheet.Cells[i, ArmatureNameColumn].Value.ToString().Trim(), i, new List<string> { });
+                    Armature armature = new Armature(worksheet.Cells[i, ArmatureNameColumn].Value.ToString().Trim(), new List<string> { }, new List<int> { });
                     if (ignoredRowsArray.Contains(i)) continue;
                     for (int j = firstAlgorithmColumn; j <= colCount; j++)
                     {
                         if (worksheet.Cells[i, j].Value == null) continue;
                         armature.values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
+                        armature.valuesColumn.Add(j);
                     }
                     CreateB1B2(armature.name, typeArmature(armature), pathDirectoryToSave);
+                    RecordAlgorithm(armature, typeArmature(armature), pathDirectoryToSave, worksheet);
                 }
             }
         }
@@ -75,7 +77,7 @@ namespace ClassLibrary
             switch (typeArmature)
             {
                 case TypeArmature.UnidentifiedType:
-                    throw new Exception("Обработать логику данной арматуры не представляется возможным для текущей версии программы :(");                    
+                    throw new Exception("Обработать логику данной арматуры (" + armatureName + ") не представляется возможным для текущей версии программы :(");                    
                 case TypeArmature.BansNotExists:
                     Txt.CreateTxt(pathB1, "Команда", false);
                     break;
@@ -87,18 +89,68 @@ namespace ClassLibrary
                     Txt.CreateTxt(pathB2, "Команда", true);
                     break;
             }
-                //if (!File.Exists(pathTxt))
-                //{
-                //    Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j), B2Exists);
-                //}
+        }
 
-            //    if (B2Exists)
-            //    {
-            //        if (!File.Exists(pathTxtB2))
-            //        {
-            //            Txt.CreateTxt(pathTxtB2, "Команда", B2Exists);
-            //        }
-            //    }
+        private static void RecordAlgorithm(Armature armature, TypeArmature typeArmature, string pathDirectoryToSave, ExcelWorksheet worksheet)
+        {
+            var pathB1 = Path.Combine(pathDirectoryToSave + armature.name+ "_B1.db");
+            var pathB2 = Path.Combine(pathDirectoryToSave + armature.name + "_B2.db");
+
+            for (int i = 0; i <= armature.values.Count() - 1; i++)
+            {
+                var algorithmColumn = armature.valuesColumn[i];
+                var string2 = worksheet.Cells[2, algorithmColumn].Value.ToString().Trim() + "||" + worksheet.Cells[3, algorithmColumn].Value.ToString().Trim() +
+                                    "||" + worksheet.Cells[4, algorithmColumn].Value.ToString().Trim();
+                var string3 = worksheet.Cells[5, algorithmColumn].Value.ToString().Trim() + "||" + worksheet.Cells[6, algorithmColumn].Value.ToString();
+                var string4 = worksheet.Cells[7, algorithmColumn].Value.ToString().Trim() + "||" + worksheet.Cells[8, algorithmColumn].Value.ToString().Trim() + "||";
+
+                switch (typeArmature)
+                {
+                    case TypeArmature.UnidentifiedType:
+                        throw new Exception("Обработать логику данной арматуры (" + armature.name + ") не представляется возможным для текущей версии программы :(");
+                    case TypeArmature.BansNotExists:
+                        string4 += armature.values[i];
+                        Txt.WriteTxt(pathB1, string2, string3, string4);
+                        break;
+                    case TypeArmature.CommandsNotExist:
+                        string4 += armature.values[i];
+                        Txt.WriteTxt(pathB1, string2, string3, string4);
+                        break;
+                    case TypeArmature.CommandsExistInSecondField:
+
+                        break;
+                    default:
+                        //Txt.CreateTxt(pathB1, "Запрет", true);
+                        //Txt.CreateTxt(pathB2, "Команда", true);
+                        break;
+                }
+            }
+
+            
+            
+
+            //                        if (!unnormalRowsArray.Contains(i))
+            //                        {
+            //                            var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
+            //                            Txt.WriteTxt(pathTxt, string2, string3, string4);
+            //                            if (b2Exists)
+            //                            {
+            //                                var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
+            //                                Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
+            //                            }
+            //                        }
+            //                        else
+            //                        {
+            //                            var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
+            //                            if (bansArray.Contains(cellValue.Split('/')[0]))
+            //                            {                                        
+            //                                Txt.WriteTxt(pathTxt, string2, string3, string4);
+            //                            }
+            //                            else if (commandsArray.Contains(cellValue.Split('/')[0]))
+            //                            {
+            //                                Txt.WriteTxt(pathTxtB2, string2, string3, string4);
+            //                            }
+            //                            else throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[0] + " в ячейке по адресу - строка " + i + " столбец " + j);
         }
     }
 }
