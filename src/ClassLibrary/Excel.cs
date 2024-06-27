@@ -37,7 +37,7 @@ namespace ClassLibrary
                         if (worksheet.Cells[i, j].Value == null) continue;
                         armature.values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
                     }
-                    typeArmature(armature);
+                    Console.WriteLine(typeArmature(armature));
                 }
             }
         }
@@ -50,9 +50,9 @@ namespace ClassLibrary
 
             foreach (string value in armature.values)
             {
+                var firstFieldValue = value.Split('/')[0];
                 if (value.Split('/').Length == 1) 
-                {
-                    var firstFieldValue = value.Split('/')[0];
+                {                    
                     if (bansArray.Contains(firstFieldValue)) bansInFirstField = true;
                     else if (commandsArray.Contains(firstFieldValue)) commandsInFirstField = true;
                     else throw new Exception("Неопознанный запрет или команда: " + firstFieldValue);
@@ -60,6 +60,7 @@ namespace ClassLibrary
                 else if (value.Split('/').Length > 1)
                 {
                     var secondFieldValue = value.Split('/')[1];
+                    if (bansArray.Contains(firstFieldValue)) bansInFirstField = true;
                     if (commandsArray.Contains(secondFieldValue)) commandsInSecondField = true;
                     else if (secondFieldValue != "Руч") throw new Exception("Неопознанный запрет или команда: " + secondFieldValue);
                 }                
