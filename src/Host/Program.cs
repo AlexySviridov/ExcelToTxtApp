@@ -7,10 +7,12 @@ namespace Host
         static void Main()
         {
             var pathToExcel = "C:\\Users\\User\\Desktop\\Илья\\K6. Info v1.35.xlsx";
-            int numberWorksheets = 12;
+            int numberWorksheets = 12;            
+            var firstArmatureRow = 13;
+            var firstArmatureColumn = 3;
             var ignoredRowsArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90 };
 
-            Excel.Read (pathToExcel, numberWorksheets, ignoredRowsArray);
+            Excel.Read (pathToExcel, numberWorksheets, ignoredRowsArray, firstArmatureRow, firstArmatureColumn);
         }
 
         //static void Main(string[] args)
