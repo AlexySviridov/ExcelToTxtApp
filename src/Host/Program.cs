@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System;
-using ClassLibrary;
-using System.Linq;
+﻿using ClassLibrary;
 
 namespace Host
 {
@@ -10,6 +7,9 @@ namespace Host
         static void Main()
         {
             var pathToExcel = "C:\\Users\\User\\Desktop\\Илья\\K6. Info v1.35.xlsx";
+            int numberWorksheets = 12;
+
+            Excel.ReadExcel (pathToExcel, numberWorksheets);
         }
 
         //static void Main(string[] args)
