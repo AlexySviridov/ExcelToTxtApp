@@ -7,13 +7,14 @@ namespace Host
         static void Main()
         {
             var pathToExcel = "C:\\Users\\User\\Desktop\\Илья\\K6. Info v1.35.xlsx";
-            int numberWorksheets = 12;            
+            var pathDirectoryToSave = "C:\\Users\\User\\Desktop\\ТЗиБ\\";
+            var numberWorksheets = 12;            
             var firstArmatureRow = 13;
             var ArmatureNameColumn = 3;
             var firstAlgorithmColumn = 5;
-            var ignoredRowsArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90 };
+            var ignoredRowsArray = new[] { 15, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 49, 87, 88, 90 };            
 
-            Excel.Read (pathToExcel, numberWorksheets, ignoredRowsArray, firstArmatureRow, ArmatureNameColumn, firstAlgorithmColumn);
+            ExcelTZiB.ReadDbTZiB (pathToExcel, numberWorksheets, ignoredRowsArray, firstArmatureRow, ArmatureNameColumn, firstAlgorithmColumn, pathDirectoryToSave);
         }
 
         //static void Main(string[] args)

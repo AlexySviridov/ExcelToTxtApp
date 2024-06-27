@@ -7,24 +7,18 @@ using System.Collections.Generic;
 
 namespace ClassLibrary
 {
-    public class Excel
+    public class ExcelTZiB
     {
         readonly static string[] bansArray = new[] { "ЗапО", "ЗапЗ" };
         readonly static string[] commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл" };        
-        enum TypeArmature
-        {
-            BansNotExists,
-            CommandsNotExist, 
-            BansAndCommandsExistInFirstField, 
-            CommandsExistInSecondField,
-            UnidentifiedType
-        }
-        public static void Read(string pathToExcel, int numberWorksheets, int[] ignoredRowsArray, int firstArmatureRow, int ArmatureNameColumn, int firstAlgorithmColumn)
+
+        public static void ReadDbTZiB (string pathToExcel, int numberWorksheet, int[] ignoredRowsArray, int firstArmatureRow, int ArmatureNameColumn, int firstAlgorithmColumn, 
+            string pathDirectoryToSave)
         {
             FileInfo existingFile = new FileInfo(pathToExcel);
             using (ExcelPackage package = new ExcelPackage(existingFile))
             {
-                ExcelWorksheet worksheet = package.Workbook.Worksheets[numberWorksheets];
+                ExcelWorksheet worksheet = package.Workbook.Worksheets[numberWorksheet];
                 int colCount = worksheet.Dimension.End.Column;
                 int rowCount = worksheet.Dimension.End.Row;
 
@@ -37,7 +31,7 @@ namespace ClassLibrary
                         if (worksheet.Cells[i, j].Value == null) continue;
                         armature.values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
                     }
-                    Console.WriteLine(typeArmature(armature));
+                    CreateB1B2(armature.name, typeArmature(armature), pathDirectoryToSave);
                 }
             }
         }
@@ -71,6 +65,31 @@ namespace ClassLibrary
             else if (bansInFirstField && commandsInFirstField) return TypeArmature.BansAndCommandsExistInFirstField;
             else if (bansInFirstField && commandsInSecondField) return TypeArmature.CommandsExistInSecondField;
             else return TypeArmature.UnidentifiedType;
+        }
+
+        private static void CreateB1B2(string armatureName, TypeArmature typeArmature, string pathDirectoryToSave)
+        {
+            var pathB1 = Path.Combine(pathDirectoryToSave + armatureName + "_B1.db");
+            var pathB2 = Path.Combine(pathDirectoryToSave + armatureName + "_B2.db");
+
+            switch (typeArmature)
+            {
+                case TypeArmature.BansNotExists:
+                    Txt.CreateTxt(pathB1, "Команда", false);
+                    break;
+            }
+                //if (!File.Exists(pathTxt))
+                //{
+                //    Txt.CreateTxt(pathTxt, TypeBLCAP(cellValue, commandsArray, bansArray, i, j), B2Exists);
+                //}
+
+            //    if (B2Exists)
+            //    {
+            //        if (!File.Exists(pathTxtB2))
+            //        {
+            //            Txt.CreateTxt(pathTxtB2, "Команда", B2Exists);
+            //        }
+            //    }
         }
     }
 }
