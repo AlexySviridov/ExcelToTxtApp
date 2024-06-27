@@ -6,7 +6,9 @@ namespace ClassLibrary
 {
     public class Excel
     {
-        public static void ReadExcel(string pathToExcel, int numberWorksheets)
+        readonly string[] commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл" };
+        readonly string[] bansArray = new[] { "ЗапО", "ЗапЗ" };
+        public static void Read(string pathToExcel, int numberWorksheets, int[] ignoredRowsArray)
         {
             FileInfo existingFile = new FileInfo(pathToExcel);
             using (ExcelPackage package = new ExcelPackage(existingFile))
