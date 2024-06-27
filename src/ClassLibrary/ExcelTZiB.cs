@@ -74,8 +74,17 @@ namespace ClassLibrary
 
             switch (typeArmature)
             {
+                case TypeArmature.UnidentifiedType:
+                    throw new Exception("Обработать логику данной арматуры не представляется возможным для текущей версии программы :(");                    
                 case TypeArmature.BansNotExists:
                     Txt.CreateTxt(pathB1, "Команда", false);
+                    break;
+                case TypeArmature.CommandsNotExist:
+                    Txt.CreateTxt(pathB1, "Запрет", false);
+                    break;
+                default:
+                    Txt.CreateTxt(pathB1, "Запрет", true);
+                    Txt.CreateTxt(pathB2, "Команда", true);
                     break;
             }
                 //if (!File.Exists(pathTxt))
