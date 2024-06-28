@@ -21,6 +21,8 @@ namespace ClassLibrary
                 int colCount = worksheet.Dimension.End.Column;
                 int rowCount = worksheet.Dimension.End.Row;
 
+                CreateAlgorithmList(worksheet, firstAlgorithmColumn, colCount, out List<Algorithm> algorithmList);
+
                 for (int i = firstArmatureRow; i <= rowCount; i++)
                 {
                     Armature armature = new Armature(worksheet.Cells[i, ArmatureNameColumn].Value.ToString().Trim(), new List<string> { }, new List<int> { });
@@ -34,9 +36,40 @@ namespace ClassLibrary
                         armature.values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
                         armature.valuesColumn.Add(j);
                     }
-                    CreateB1B2(armature.name, typeArmature(armature), pathB1, pathB2, bansArray);
-                    RecordAlgorithm(armature, typeArmature(armature), pathB1, pathB2, worksheet, firstAlgorithmColumn);
+                    CreateB1B2Txt(armature.name, typeArmature(armature), pathB1, pathB2, bansArray);
+                    RecordAlgorithmToTxt(armature, typeArmature(armature), pathB1, pathB2, worksheet, firstAlgorithmColumn);
                 }
+            }
+        }
+
+        private static void CreateAlgorithmList(ExcelWorksheet worksheet, int firstAlgorithmColumn, int colCount, out List<Algorithm> algorithmList)
+        {
+            algorithmList = new List<Algorithm>();
+
+            for (int j = firstAlgorithmColumn; j <= colCount; j++)
+            {
+                var algorithmColumn = j;
+                var signalBefore = worksheet.Cells[2, j].Value.ToString().Trim();
+                var conditionAnimation = worksheet.Cells[3, j].Value.ToString().Trim();
+                var mnenonicDiagram = worksheet.Cells[4, j].Value.ToString().Trim();
+                var algorithmPosition = worksheet.Cells[5, j].Value.ToString().Trim();
+                var algorithmName = worksheet.Cells[6, j].Value.ToString();
+                var overlay = worksheet.Cells[7, j].Value.ToString().Trim();
+                var outputRelay = worksheet.Cells[8, j].Value.ToString().Trim();
+
+                if (algorithmColumn == firstAlgorithmColumn)
+                {
+                    algorithmPosition = "";
+                    overlay = "";
+                    outputRelay = "";
+                }
+
+                var string2 = signalBefore + "||" + conditionAnimation + "||" + mnenonicDiagram;
+                var string3 = algorithmPosition + "||" + algorithmName;
+                var string4 = overlay + "||" + outputRelay + "||";
+
+                Algorithm algorithm = new Algorithm(algorithmColumn, string2, string3, string4);
+                algorithmList.Add(algorithm);
             }
         }
 
@@ -71,7 +104,7 @@ namespace ClassLibrary
             else return TypeArmature.UnidentifiedType;
         }
 
-        private static void CreateB1B2(string armatureName, TypeArmature typeArmature, string pathB1, string pathB2, string[] bansArray)
+        private static void CreateB1B2Txt(string armatureName, TypeArmature typeArmature, string pathB1, string pathB2, string[] bansArray)
         {
             switch (typeArmature)
             {
@@ -90,7 +123,7 @@ namespace ClassLibrary
             }
         }
 
-        private static void RecordAlgorithm(Armature armature, TypeArmature typeArmature, string pathB1, string pathB2, ExcelWorksheet worksheet, int firstAlgorithmColumn)
+        private static void RecordAlgorithmToTxt(Armature armature, TypeArmature typeArmature, string pathB1, string pathB2, ExcelWorksheet worksheet, int firstAlgorithmColumn)
         {
             for (int i = 0; i <= armature.values.Count() - 1; i++)
             {
