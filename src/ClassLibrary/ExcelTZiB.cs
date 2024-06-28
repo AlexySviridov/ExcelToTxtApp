@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 
-
 namespace ClassLibrary
 {
     public class ExcelTZiB
@@ -25,6 +24,9 @@ namespace ClassLibrary
                 for (int i = firstArmatureRow; i <= rowCount; i++)
                 {
                     Armature armature = new Armature(worksheet.Cells[i, ArmatureNameColumn].Value.ToString().Trim(), new List<string> { }, new List<int> { });
+                    var pathB1 = Path.Combine(pathDirectoryToSave + armature.name + "_B1.db");
+                    var pathB2 = Path.Combine(pathDirectoryToSave + armature.name + "_B2.db");
+
                     if (ignoredRowsArray.Contains(i)) continue;
                     for (int j = firstAlgorithmColumn; j <= colCount; j++)
                     {
@@ -32,8 +34,8 @@ namespace ClassLibrary
                         armature.values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
                         armature.valuesColumn.Add(j);
                     }
-                    CreateB1B2(armature.name, typeArmature(armature), pathDirectoryToSave);
-                    RecordAlgorithm(armature, typeArmature(armature), pathDirectoryToSave, worksheet);
+                    CreateB1B2(armature.name, typeArmature(armature), pathB1, pathB2, bansArray);
+                    RecordAlgorithm(armature, typeArmature(armature), pathB1, pathB2, worksheet, firstAlgorithmColumn);
                 }
             }
         }
@@ -69,11 +71,8 @@ namespace ClassLibrary
             else return TypeArmature.UnidentifiedType;
         }
 
-        private static void CreateB1B2(string armatureName, TypeArmature typeArmature, string pathDirectoryToSave)
+        private static void CreateB1B2(string armatureName, TypeArmature typeArmature, string pathB1, string pathB2, string[] bansArray)
         {
-            var pathB1 = Path.Combine(pathDirectoryToSave + armatureName + "_B1.db");
-            var pathB2 = Path.Combine(pathDirectoryToSave + armatureName + "_B2.db");
-
             switch (typeArmature)
             {
                 case TypeArmature.UnidentifiedType:
@@ -91,66 +90,50 @@ namespace ClassLibrary
             }
         }
 
-        private static void RecordAlgorithm(Armature armature, TypeArmature typeArmature, string pathDirectoryToSave, ExcelWorksheet worksheet)
+        private static void RecordAlgorithm(Armature armature, TypeArmature typeArmature, string pathB1, string pathB2, ExcelWorksheet worksheet, int firstAlgorithmColumn)
         {
-            var pathB1 = Path.Combine(pathDirectoryToSave + armature.name+ "_B1.db");
-            var pathB2 = Path.Combine(pathDirectoryToSave + armature.name + "_B2.db");
-
             for (int i = 0; i <= armature.values.Count() - 1; i++)
             {
                 var algorithmColumn = armature.valuesColumn[i];
-                var string2 = worksheet.Cells[2, algorithmColumn].Value.ToString().Trim() + "||" + worksheet.Cells[3, algorithmColumn].Value.ToString().Trim() +
-                                    "||" + worksheet.Cells[4, algorithmColumn].Value.ToString().Trim();
-                var string3 = worksheet.Cells[5, algorithmColumn].Value.ToString().Trim() + "||" + worksheet.Cells[6, algorithmColumn].Value.ToString();
-                var string4 = worksheet.Cells[7, algorithmColumn].Value.ToString().Trim() + "||" + worksheet.Cells[8, algorithmColumn].Value.ToString().Trim() + "||";
+                var signalBefore = worksheet.Cells[2, algorithmColumn].Value.ToString().Trim();
+                var conditionAnimation = worksheet.Cells[3, algorithmColumn].Value.ToString().Trim();
+                var mnenonicDiagram = worksheet.Cells[4, algorithmColumn].Value.ToString().Trim();
+                var algorithmPosition = worksheet.Cells[5, algorithmColumn].Value.ToString().Trim();
+                var algorithmName = worksheet.Cells[6, algorithmColumn].Value.ToString();
+                var overlay = worksheet.Cells[7, algorithmColumn].Value.ToString().Trim();
+                var outputRelay = worksheet.Cells[8, algorithmColumn].Value.ToString().Trim();
+
+                if (algorithmColumn == firstAlgorithmColumn)
+                {
+                    algorithmPosition = "";
+                    overlay = "";
+                    outputRelay = "";
+                }
+
+                var string2 = signalBefore + "||" + conditionAnimation + "||" + mnenonicDiagram;
+                var string3 = algorithmPosition + "||" + algorithmName;
+                var string4 = overlay + "||" + outputRelay + "||";
 
                 switch (typeArmature)
                 {
                     case TypeArmature.UnidentifiedType:
-                        throw new Exception("Обработать логику данной арматуры (" + armature.name + ") не представляется возможным для текущей версии программы :(");
+                        throw new Exception("Обработать логику данной арматуры (" + armature.name + ") не представляется возможным для текущей версии программы O_o");
                     case TypeArmature.BansNotExists:
-                        string4 += armature.values[i];
-                        Txt.WriteTxt(pathB1, string2, string3, string4);
+                        Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i]);
                         break;
                     case TypeArmature.CommandsNotExist:
-                        string4 += armature.values[i];
-                        Txt.WriteTxt(pathB1, string2, string3, string4);
+                        Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i]);
                         break;
                     case TypeArmature.CommandsExistInSecondField:
-
+                        Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
+                        if (armature.values[i].Split('/').Length > 1) Txt.WriteTxt(pathB2, string2, string3, string4 + armature.values[i].Split('/')[1]);
                         break;
-                    default:
-                        //Txt.CreateTxt(pathB1, "Запрет", true);
-                        //Txt.CreateTxt(pathB2, "Команда", true);
+                    case TypeArmature.BansAndCommandsExistInFirstField:
+                        if (bansArray.Contains(armature.values[i].Split('/')[0])) Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
+                        else Txt.WriteTxt(pathB2, string2, string3, string4 + armature.values[i].Split('/')[0]);
                         break;
                 }
             }
-
-            
-            
-
-            //                        if (!unnormalRowsArray.Contains(i))
-            //                        {
-            //                            var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
-            //                            Txt.WriteTxt(pathTxt, string2, string3, string4);
-            //                            if (b2Exists)
-            //                            {
-            //                                var string4B2 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[1];
-            //                                Txt.WriteTxt(pathTxtB2, string2, string3, string4B2);
-            //                            }
-            //                        }
-            //                        else
-            //                        {
-            //                            var string4 = nakladka + "||" + outputReley + "||" + cellValue.Split('/')[0];
-            //                            if (bansArray.Contains(cellValue.Split('/')[0]))
-            //                            {                                        
-            //                                Txt.WriteTxt(pathTxt, string2, string3, string4);
-            //                            }
-            //                            else if (commandsArray.Contains(cellValue.Split('/')[0]))
-            //                            {
-            //                                Txt.WriteTxt(pathTxtB2, string2, string3, string4);
-            //                            }
-            //                            else throw new Exception("Неопознанная команда или запрет: " + cellValue.Split('/')[0] + " в ячейке по адресу - строка " + i + " столбец " + j);
         }
     }
 }
