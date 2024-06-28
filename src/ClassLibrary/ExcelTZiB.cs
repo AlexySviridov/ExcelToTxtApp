@@ -37,7 +37,7 @@ namespace ClassLibrary
                         armature.valuesColumn.Add(j);
                     }
                     CreateB1B2Txt(armature.name, typeArmature(armature), pathB1, pathB2, bansArray);
-                    RecordAlgorithmToTxt(armature, typeArmature(armature), pathB1, pathB2, worksheet, firstAlgorithmColumn);
+                    RecordAlgorithmToTxt(armature, typeArmature(armature), pathB1, pathB2, algorithmList, firstAlgorithmColumn);
                 }
             }
         }
@@ -123,29 +123,14 @@ namespace ClassLibrary
             }
         }
 
-        private static void RecordAlgorithmToTxt(Armature armature, TypeArmature typeArmature, string pathB1, string pathB2, ExcelWorksheet worksheet, int firstAlgorithmColumn)
+        private static void RecordAlgorithmToTxt(Armature armature, TypeArmature typeArmature, string pathB1, string pathB2, List<Algorithm> algorithmsList, int firstAlgorithmColumn)
         {
             for (int i = 0; i <= armature.values.Count() - 1; i++)
             {
-                var algorithmColumn = armature.valuesColumn[i];
-                var signalBefore = worksheet.Cells[2, algorithmColumn].Value.ToString().Trim();
-                var conditionAnimation = worksheet.Cells[3, algorithmColumn].Value.ToString().Trim();
-                var mnenonicDiagram = worksheet.Cells[4, algorithmColumn].Value.ToString().Trim();
-                var algorithmPosition = worksheet.Cells[5, algorithmColumn].Value.ToString().Trim();
-                var algorithmName = worksheet.Cells[6, algorithmColumn].Value.ToString();
-                var overlay = worksheet.Cells[7, algorithmColumn].Value.ToString().Trim();
-                var outputRelay = worksheet.Cells[8, algorithmColumn].Value.ToString().Trim();
-
-                if (algorithmColumn == firstAlgorithmColumn)
-                {
-                    algorithmPosition = "";
-                    overlay = "";
-                    outputRelay = "";
-                }
-
-                var string2 = signalBefore + "||" + conditionAnimation + "||" + mnenonicDiagram;
-                var string3 = algorithmPosition + "||" + algorithmName;
-                var string4 = overlay + "||" + outputRelay + "||";
+                var algorithmColumnNumber = armature.valuesColumn[i] - firstAlgorithmColumn;
+                var string2 = algorithmsList[algorithmColumnNumber].string2;
+                var string3 = algorithmsList[algorithmColumnNumber].string3;
+                var string4 = algorithmsList[algorithmColumnNumber].string4;
 
                 switch (typeArmature)
                 {
