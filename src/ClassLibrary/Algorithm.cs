@@ -2,17 +2,17 @@
 {
     internal class Algorithm
     {
-        public int algorithmColumn;
-        public string string2;
-        public string string3;
-        public string string4;
+        public int AlgorithmColumn;
+        public string String2;
+        public string String3;
+        public string String4;
 
         public Algorithm(int algorithmColumn, string string2, string string3, string string4)
         {
-            this.algorithmColumn = algorithmColumn;
-            this.string2 = string2;
-            this.string3 = string3;
-            this.string4 = string4;
+            AlgorithmColumn = algorithmColumn;
+            String2 = string2;
+            String3 = string3;
+            String4 = string4;
         }
     }
 }

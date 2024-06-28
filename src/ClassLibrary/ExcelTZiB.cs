@@ -32,11 +32,12 @@ namespace ClassLibrary
                     for (int j = firstAlgorithmColumn; j <= colCount; j++)
                     {
                         if (worksheet.Cells[i, j].Value == null) continue;
-                        armature.values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
-                        armature.valuesColumn.Add(j);
+                        armature.Values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
+                        armature.ValuesColumn.Add(j);
                     }
-                    CreateB1B2Txt(armature, typeArmature(armature));
-                    RecordAlgorithmToTxt(armature, typeArmature(armature), algorithmList, firstAlgorithmColumn);
+                    armature.IdentifiedArmatureType(bansArray, commandsArray, out TypeArmature typeArmature);
+                    CreateB1B2Txt(armature, typeArmature);
+                    RecordAlgorithmToTxt(armature, typeArmature, algorithmList, firstAlgorithmColumn);
                 }
             }
         }
@@ -70,85 +71,54 @@ namespace ClassLibrary
                 Algorithm algorithm = new Algorithm(algorithmColumn, string2, string3, string4);
                 algorithmList.Add(algorithm);
             }
-        }
-
-        private static TypeArmature typeArmature(Armature armature)
-        {
-            var bansInFirstField = false;
-            var commandsInFirstField = false;
-            var commandsInSecondField = false;
-
-            foreach (string value in armature.values)
-            {
-                var firstFieldValue = value.Split('/')[0];
-                if (value.Split('/').Length == 1) 
-                {                    
-                    if (bansArray.Contains(firstFieldValue)) bansInFirstField = true;
-                    else if (commandsArray.Contains(firstFieldValue)) commandsInFirstField = true;
-                    else throw new Exception("Неопознанный запрет или команда: " + firstFieldValue);
-                }
-                else if (value.Split('/').Length > 1)
-                {
-                    var secondFieldValue = value.Split('/')[1];
-                    if (bansArray.Contains(firstFieldValue)) bansInFirstField = true;
-                    if (commandsArray.Contains(secondFieldValue)) commandsInSecondField = true;
-                    else if (secondFieldValue != "Руч") throw new Exception("Неопознанный запрет или команда: " + secondFieldValue);
-                }                
-            }
-
-            if (!bansInFirstField) return TypeArmature.BansNotExists;
-            else if (!commandsInFirstField && !commandsInSecondField) return TypeArmature.CommandsNotExist;
-            else if (bansInFirstField && commandsInFirstField) return TypeArmature.BansAndCommandsExistInFirstField;
-            else if (bansInFirstField && commandsInSecondField) return TypeArmature.CommandsExistInSecondField;
-            else return TypeArmature.UnidentifiedType;
-        }
+        }       
 
         private static void CreateB1B2Txt(Armature armature, TypeArmature typeArmature)
         {
             switch (typeArmature)
             {
                 case TypeArmature.UnidentifiedType:
-                    throw new Exception("Обработать логику данной арматуры (" + armature.name + ") не представляется возможным для текущей версии программы :(");                    
+                    throw new Exception("Обработать логику данной арматуры (" + armature.Name + ") не представляется возможным для текущей версии программы :(");                    
                 case TypeArmature.BansNotExists:
-                    Txt.CreateTxt(armature.pathB1, "Команда", false);
+                    Txt.CreateTxt(armature.PathB1, "Команда", false);
                     break;
                 case TypeArmature.CommandsNotExist:
-                    Txt.CreateTxt(armature.pathB1, "Запрет", false);
+                    Txt.CreateTxt(armature.PathB1, "Запрет", false);
                     break;
                 default:
-                    Txt.CreateTxt(armature.pathB1, "Запрет", true);
-                    Txt.CreateTxt(armature.pathB2, "Команда", true);
+                    Txt.CreateTxt(armature.PathB1, "Запрет", true);
+                    Txt.CreateTxt(armature.PathB2, "Команда", true);
                     break;
             }
         }
 
         private static void RecordAlgorithmToTxt(Armature armature, TypeArmature typeArmature, List<Algorithm> algorithmsList, int firstAlgorithmColumn)
         {
-            for (int i = 0; i <= armature.values.Count() - 1; i++)
+            for (int i = 0; i <= armature.Values.Count() - 1; i++)
             {
-                var algorithmColumnNumber = armature.valuesColumn[i] - firstAlgorithmColumn;
-                var string2 = algorithmsList[algorithmColumnNumber].string2;
-                var string3 = algorithmsList[algorithmColumnNumber].string3;
-                var string4 = algorithmsList[algorithmColumnNumber].string4;
+                var algorithmColumnNumber = armature.ValuesColumn[i] - firstAlgorithmColumn;
+                var string2 = algorithmsList[algorithmColumnNumber].String2;
+                var string3 = algorithmsList[algorithmColumnNumber].String3;
+                var string4 = algorithmsList[algorithmColumnNumber].String4;
 
                 switch (typeArmature)
                 {
                     case TypeArmature.UnidentifiedType:
-                        throw new Exception("Обработать логику данной арматуры (" + armature.name + ") не представляется возможным для текущей версии программы O_o");
+                        throw new Exception("Обработать логику данной арматуры (" + armature.Name + ") не представляется возможным для текущей версии программы O_o");
                     case TypeArmature.BansNotExists:
-                        Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i]);
+                        Txt.WriteTxt(armature.PathB1, string2, string3, string4 + armature.Values[i]);
                         break;
                     case TypeArmature.CommandsNotExist:
-                        Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i]);
+                        Txt.WriteTxt(armature.PathB1, string2, string3, string4 + armature.Values[i]);
                         break;
                     case TypeArmature.CommandsExistInSecondField:
-                        Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
-                        if (armature.values[i].Split('/').Length > 1) Txt.WriteTxt(armature.pathB2, string2, string3, string4 + armature.values[i].Split('/')[1]);
+                        Txt.WriteTxt(armature.PathB1, string2, string3, string4 + armature.Values[i].Split('/')[0]);
+                        if (armature.Values[i].Split('/').Length > 1) Txt.WriteTxt(armature.PathB2, string2, string3, string4 + armature.Values[i].Split('/')[1]);
                         break;
                     case TypeArmature.BansAndCommandsExistInFirstField:
-                        if (bansArray.Contains(armature.values[i].Split('/')[0])) 
-                            Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
-                        else Txt.WriteTxt(armature.pathB2, string2, string3, string4 + armature.values[i].Split('/')[0]);
+                        if (bansArray.Contains(armature.Values[i].Split('/')[0])) 
+                            Txt.WriteTxt(armature.PathB1, string2, string3, string4 + armature.Values[i].Split('/')[0]);
+                        else Txt.WriteTxt(armature.PathB2, string2, string3, string4 + armature.Values[i].Split('/')[0]);
                         break;
                 }
             }
