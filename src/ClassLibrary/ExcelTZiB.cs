@@ -11,7 +11,7 @@ namespace ClassLibrary
         readonly static string[] bansArray = new[] { "ЗапО", "ЗапЗ" };
         readonly static string[] commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл" };        
 
-        public static void ReadDbTZiB (string pathToExcel, int numberWorksheet, int[] ignoredRowsArray, int firstArmatureRow, int ArmatureNameColumn, int firstAlgorithmColumn, 
+        public static void DoAllJob (string pathToExcel, int numberWorksheet, int[] ignoredRowsArray, int firstArmatureRow, int ArmatureNameColumn, int firstAlgorithmColumn, 
             string pathDirectoryToSave)
         {
             FileInfo existingFile = new FileInfo(pathToExcel);
