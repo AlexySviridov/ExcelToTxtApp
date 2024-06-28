@@ -11,7 +11,7 @@ namespace ClassLibrary
         readonly static string[] bansArray = new[] { "ЗапО", "ЗапЗ" };
         readonly static string[] commandsArray = new[] { "Закр", "Откр", "Вкл", "Откл" };        
 
-        public static void DoAllJob (string pathToExcel, int numberWorksheet, int[] ignoredRowsArray, int firstArmatureRow, int ArmatureNameColumn, int firstAlgorithmColumn, 
+        public static void DoAllWork (string pathToExcel, int numberWorksheet, int[] ignoredRowsArray, int firstArmatureRow, int ArmatureNameColumn, int firstAlgorithmColumn, 
             string pathDirectoryToSave)
         {
             FileInfo existingFile = new FileInfo(pathToExcel);
@@ -22,12 +22,11 @@ namespace ClassLibrary
                 int rowCount = worksheet.Dimension.End.Row;
 
                 CreateAlgorithmList(worksheet, firstAlgorithmColumn, colCount, out List<Algorithm> algorithmList);
-
+                
                 for (int i = firstArmatureRow; i <= rowCount; i++)
                 {
-                    Armature armature = new Armature(worksheet.Cells[i, ArmatureNameColumn].Value.ToString().Trim(), new List<string> { }, new List<int> { });
-                    var pathB1 = Path.Combine(pathDirectoryToSave + armature.name + "_B1.db");
-                    var pathB2 = Path.Combine(pathDirectoryToSave + armature.name + "_B2.db");
+                    var armatureName = worksheet.Cells[i, ArmatureNameColumn].Value.ToString().Trim();
+                    Armature armature = new Armature(armatureName, new List<string> { }, new List<int> { }, pathDirectoryToSave);
 
                     if (ignoredRowsArray.Contains(i)) continue;
                     for (int j = firstAlgorithmColumn; j <= colCount; j++)
@@ -36,8 +35,8 @@ namespace ClassLibrary
                         armature.values.Add(worksheet.Cells[i, j].Value.ToString().Trim());
                         armature.valuesColumn.Add(j);
                     }
-                    CreateB1B2Txt(armature.name, typeArmature(armature), pathB1, pathB2, bansArray);
-                    RecordAlgorithmToTxt(armature, typeArmature(armature), pathB1, pathB2, algorithmList, firstAlgorithmColumn);
+                    CreateB1B2Txt(armature, typeArmature(armature));
+                    RecordAlgorithmToTxt(armature, typeArmature(armature), algorithmList, firstAlgorithmColumn);
                 }
             }
         }
@@ -104,26 +103,26 @@ namespace ClassLibrary
             else return TypeArmature.UnidentifiedType;
         }
 
-        private static void CreateB1B2Txt(string armatureName, TypeArmature typeArmature, string pathB1, string pathB2, string[] bansArray)
+        private static void CreateB1B2Txt(Armature armature, TypeArmature typeArmature)
         {
             switch (typeArmature)
             {
                 case TypeArmature.UnidentifiedType:
-                    throw new Exception("Обработать логику данной арматуры (" + armatureName + ") не представляется возможным для текущей версии программы :(");                    
+                    throw new Exception("Обработать логику данной арматуры (" + armature.name + ") не представляется возможным для текущей версии программы :(");                    
                 case TypeArmature.BansNotExists:
-                    Txt.CreateTxt(pathB1, "Команда", false);
+                    Txt.CreateTxt(armature.pathB1, "Команда", false);
                     break;
                 case TypeArmature.CommandsNotExist:
-                    Txt.CreateTxt(pathB1, "Запрет", false);
+                    Txt.CreateTxt(armature.pathB1, "Запрет", false);
                     break;
                 default:
-                    Txt.CreateTxt(pathB1, "Запрет", true);
-                    Txt.CreateTxt(pathB2, "Команда", true);
+                    Txt.CreateTxt(armature.pathB1, "Запрет", true);
+                    Txt.CreateTxt(armature.pathB2, "Команда", true);
                     break;
             }
         }
 
-        private static void RecordAlgorithmToTxt(Armature armature, TypeArmature typeArmature, string pathB1, string pathB2, List<Algorithm> algorithmsList, int firstAlgorithmColumn)
+        private static void RecordAlgorithmToTxt(Armature armature, TypeArmature typeArmature, List<Algorithm> algorithmsList, int firstAlgorithmColumn)
         {
             for (int i = 0; i <= armature.values.Count() - 1; i++)
             {
@@ -137,18 +136,19 @@ namespace ClassLibrary
                     case TypeArmature.UnidentifiedType:
                         throw new Exception("Обработать логику данной арматуры (" + armature.name + ") не представляется возможным для текущей версии программы O_o");
                     case TypeArmature.BansNotExists:
-                        Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i]);
+                        Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i]);
                         break;
                     case TypeArmature.CommandsNotExist:
-                        Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i]);
+                        Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i]);
                         break;
                     case TypeArmature.CommandsExistInSecondField:
-                        Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
-                        if (armature.values[i].Split('/').Length > 1) Txt.WriteTxt(pathB2, string2, string3, string4 + armature.values[i].Split('/')[1]);
+                        Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
+                        if (armature.values[i].Split('/').Length > 1) Txt.WriteTxt(armature.pathB2, string2, string3, string4 + armature.values[i].Split('/')[1]);
                         break;
                     case TypeArmature.BansAndCommandsExistInFirstField:
-                        if (bansArray.Contains(armature.values[i].Split('/')[0])) Txt.WriteTxt(pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
-                        else Txt.WriteTxt(pathB2, string2, string3, string4 + armature.values[i].Split('/')[0]);
+                        if (bansArray.Contains(armature.values[i].Split('/')[0])) 
+                            Txt.WriteTxt(armature.pathB1, string2, string3, string4 + armature.values[i].Split('/')[0]);
+                        else Txt.WriteTxt(armature.pathB2, string2, string3, string4 + armature.values[i].Split('/')[0]);
                         break;
                 }
             }
